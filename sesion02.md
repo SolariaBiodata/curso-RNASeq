@@ -4,7 +4,7 @@ permalink: /sesion02.html
 ![alt text](https://solariabiodata.com.mx/images/solaria_banner.png "Soluciones de Siguiente Generación")
 # Curso de Análisis de Datos de RNA-Seq
 
-## Sesión Práctica del Día 04
+## Sección 02: Revisión y Filtrado de Calidad
 
 ### Descripción
 En esta sesión aprenderemos lo necesario para descargar secuencias de NCBI, filtrar las búsquedas con opciones avanzadas y empezar a realizar comparaciones en resultados de alineamientos.

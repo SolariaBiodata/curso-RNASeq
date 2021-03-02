@@ -4,7 +4,7 @@ permalink: /sesion01.html
 ![alt text](https://solariabiodata.com.mx/images/solaria_banner.png "Soluciones de Siguiente Generación")
 # Curso de Análisis de Datos de RNA-Seq
 
-## Sesión Práctica del Día 03
+## Sección 01: Ejercicios de Conversión de Formatos y Revisión de Calidad
 
 ### Descripción
 En esta sesión aprenderemos lo necesario para descargar secuencias de NCBI, filtrar las búsquedas con opciones avanzadas y empezar a realizar comparaciones en resultados de alineamientos.
@@ -52,7 +52,7 @@ A continuación, observaremos la estructura de un archivo de lecturas en formato
     ~~~
     grep -c "^@" archivo.fastq
     ~~~
-## Ejercicio 02: Conversión de Formatostre
+## Ejercicio 02: Conversión de Formatos
 ### Descripción
 Entre distintas plataformas de secuenciación, no necesariamente utiliza el archivo FASTQ como formato predeterminado. Anteriormente se utilizaban distintos formatos y en la actualidad, también es posible encontrar múltiples formatos para almacenar secuencias. A continuación, un gráfico de distintas relaciones entre formatos:
 
