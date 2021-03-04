@@ -126,5 +126,31 @@ Algunas funcionalidades adicionales que pueden ser muy útiles en Trimmomatic so
     ILLUMINACLIP:TruSeq3-PE.fa:2:30:10 \
     LEADING:20 TRAILING:20 \
     SLIDINGWINDOW:4:25 MINLEN:150
-
     ~~~
+ 
+
+## Ejercicio 05: Ejecución serial de Trimmomatic con todos los filtros para todas las muestras:
+### Descripción
+Usando las lecturas propias, podemos seleccionas valores específicos para `ILLUMINACLIP`, `LEADING`, `TRAILING`, `SLIDINGWINDOW` y `MINLEN` de tal forma que generemos 
+
+### Instrucciones
+
+1. En general tenemos que realizar este flujo para cada pareja de lecturas en todas las muestras:
+    ~~~
+    cd raw
+    
+    Trimmomatic PE muestra_R1.fastq.gz muestra_R2.fastq.gz \
+    muestra_1P.fq muestra_1U.fq muestra_2P.fq muestra_2U.fq \
+    ILLUMINACLIP:adapters.fa:2:30:10 \
+    LEADING:5 TRAILING:5 \
+    SLIDINGWINDOW:5:25 MINLEN:60 
+    ~~~
+
+2. Una vez que hemos generado todas las lecturas limpias, simplemente movemos los datos a una carpeta diferente con las lecturas limpias:
+    ~~~
+    cd ..
+    mkdir libs
+    mv raw/*P.fq raw/*U.fq libs/
+    ~~~
+
+
