@@ -18,3 +18,8 @@ Recuerda que debes dar clic en el titulo de cada sesión para poder visualizar e
   3. Corte Fijo
   4. Ventana Deslizante
   5. Modos Adicionales de Trimmomatic
+
+### [Sección 03](sesion03.md)
+  1. Ensamble ***de novo*** con Trinity
+  2. Métricas del ensamble mediante Quast
+  
