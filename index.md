@@ -22,4 +22,7 @@ Recuerda que debes dar clic en el titulo de cada sesión para poder visualizar e
 ### [Sección 03](sesion03.md)
   1. Ensamble *de novo* con Trinity
   2. Métricas del ensamble mediante Quast
-  
+
+### [Sección 04](sesion04.md)
+  1. Mapeo de Referencia y Cuantificación
+  2. Expresión Diferencial en R
