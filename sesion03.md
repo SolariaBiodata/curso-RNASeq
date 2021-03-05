@@ -1,13 +1,13 @@
 ---
-permalink: /sesion03.html
+permalink: /sesion04.html
 ---
 ![alt text](https://solariabiodata.com.mx/images/solaria_banner.png "Soluciones de Siguiente Generación")
 # Curso de Análisis de Datos de RNA-Seq
 
-## Sección 03: Ensamble ***de novo***
+## Sección 04: Perfiles de Expresión Diferencial
 
 ### Descripción
-En esta sección aprenderemos a utilizar las lecturas limpias para realizar un ensamble de transcritoma.
+En esta sección aprenderemos a utilizar las lecturas limpias para realizar un ensamble de transcriptoma.
 
 ### Requisitos
 
@@ -27,7 +27,7 @@ Es necesario concatenar todas las lecturas para hacer un ensamble completo. Una 
 ### Instrucciones (Parte 01)
 1. Primero concatenamos las lecturas:
     ~~~
-    cat libs/*1P.fq > all_1P.fq 
+    cat libs/*1P.fq > all_1P.fq
     cat libs/*2P.fq > all_2P.fq
     ~~~
 ### Instrucciones (Parte 02)
@@ -56,4 +56,3 @@ Una vez que se han generado los contigs es importante revisar algunas métricas 
     ~~~
 
 En este punto, es importante notar que se ha generado una carpeta `quast_results`. Podemos copiar esa carpeta a nuestras computadoras locales para abrir los archivos html `results.html` con un explorador web.
-
