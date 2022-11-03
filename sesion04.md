@@ -5,7 +5,7 @@ permalink: /sesion04.html
 ![alt text](https://solariabiodata.com.mx/images/solaria_banner.png "Soluciones de Siguiente Generación")
 # Curso de Análisis de Datos de RNA-Seq
 
-## Sección 04: Mapeo de Referencia y Cuantificación
+## Sección 04: Mapeo de Referencia, Cuantificación y Expresión Diferencial
 
 ### Descripción
 En esta sesión, realizaremos el perfil de expresión génica a partir de un transcriptoma de referencia (de la sección anterior).
@@ -86,27 +86,46 @@ Es necesario concatenar todas las lecturas para hacer un ensamble completo. Una 
     ~~~
     stringtie --merge -o stringtie_merged.gtf gtf_todos.txt
     ~~~
-9. Finalmente, realizaremos los perfiles de cuantificación de cada muestra, con la noción que usaremos Ballgown para el proceso de expresión Diferencial.
+9. Necesitamos crear una carpeta para depositar los resultados
     ~~~
-    stringtie -e -B -p 24 -G stringtie_merged.gtf \
-      -o ballgown/SampleA/transcripts.gtf sampleA.sort.bam
+    mkdir expression
+    ~~~
+10. Realizaremos los perfiles de cuantificación de cada muestra, con la noción que usaremos DESeq2 para el proceso de expresión Diferencial.
+    ~~~
+    stringtie -e -G stringtie_merged.gtf \
+      -o expression/SampleA/transcripts.gtf sampleA.sort.bam
     ~~~
     *** NOTA: *** Si es deseable, podemos trabajar con una operación de ciclo FOR para todas las muestras de una carpeta.
     ~~~
     for i in $(ls *sort.bam); do
-      stringtie -e -B -p 24 -G stringtie_merged.gtf \
-      -o ballgown/${i/.sort.bam}/transcripts.gtf $i;
+      stringtie -e -G stringtie_merged.gtf \
+      -o expression/${i/.sort.bam}/transcripts.gtf $i;
     done
+    ~~~
+11. Por último, realizaremos el paso de generación de dos archivos: gene_count_matrix.csv y transcript_count_matrix.csv con PrepDE.py
+    ~~~
+    prepDE.py -i expression/
     ~~~
 
 ## Ejercicio 02: Ensayo de Expresión Diferencial
 ### Descripción
-Una vez que se han generado los perfiles de expresión, utilizaremos el lenguaje de programación R para generar la expresión diferencial.
+Una vez que se han generado los perfiles de expresión, utilizaremos el lenguaje de programación R para generar la expresión diferencial. Recuerda que puedes usar https://colab.to/R para crear una libreta de R, a la que debemos instalar el paquete DESeq2
 
 ### Instrucciones
-1. Crearemos un archivo de metadatos denominado `pheno.csv`, con el contenido siguiente como ejemplo:
+0. Hay que asegurarnos que al crear una libreta de R; esto se hace con
     ~~~
-    ids,sample,experiment
+    sessionInfo()
+    ~~~
+1. Primero, instalamos DESeq2 en la libreta de trabajo
+    ~~~
+    if (!requireNamespace("BiocManager", quietly = TRUE))
+        install.packages("BiocManager")
+    
+    BiocManager::install("DESeq2")
+    ~~~
+2. Crearemos un archivo de metadatos denominado `pheno.csv`, con el contenido siguiente como ejemplo:
+    ~~~
+    ids,sample,condition
     SampleA_S7_L001,SampleA,control
     SampleA_S7_L002,SampleA,control
     SampleA_S7_L003,SampleA,control
@@ -116,35 +135,35 @@ Una vez que se han generado los perfiles de expresión, utilizaremos el lenguaje
     SampleB_S8_L003,SampleB,experimental
     SampleB_S8_L004,SampleB,experimental
     ~~~
-2. Cargaremos la consola de R, o ejecutaremos RStudio en el caso de contar con interfaz gráfica.
-3. En la consola de R o en la construcción del script de análisis, cargaremos las librerías necesarias.
+3. En la celda de colab o en la construcción del script de análisis, cargaremos las librerías necesarias.
     ~~~
     library(tidyverse)
     library(dplyr)
     library(genefilter)
     library(RSkittleBrewer)
-    library(ballgown)
+    library(DESeq2)
     ~~~
-4. Cargamos los objetos del archivo pheno.csv y toda la carpeta de resultados que generamos en el punto 9 del ejercicio anterior
+4. Cargamos los objetos del archivo pheno.csv y el archivo de gene_count_matrix.csv (o transcript_count_matrix.csv) del punto 11 del ejercicio anterior
     ~~~
     pheno = read.csv("pheno.csv")
-    bg = ballgown(dataDir = "ballgown",samplePattern ="Sample",pData = pheno)
+    datos = read.table("/content/tabla_conteos.txt", header=T, sep="\t", row.names=1)
     ~~~
-5. Utilizaremos gexpr para los perfiles de expresión diferencial de este objeto:
+5. Utilizaremos DESeqDataSetFromMatrix() para los perfiles de expresión diferencial de este objeto:
     ~~~
-    gexpr(bg)
+    dds = DESeqDataSetFromMatrix(countData = as.matrix(datos), colData = pheno, design = ~ condition)
     ~~~
-6. Filtraremos los datos para FPKM mayores a 1
+6. Para generar la expresión diferencial, invocamos la función principal DESeq()
     ~~~
-    bgf = subset(bg,"rowVars(gexpr(bg)) > 1", genomesubset=T)
+    diffexp = DESeq(dds)
+    res = results(diffexp)
     ~~~
 7. Definiremos un intervalo de confidencia para la prueba estadística de expresión Diferencial
     ~~~
     alpha = 0.01
     ~~~
-8. Ensayo de Expresion Diferencial
+8. Ahora podemos realizar algunos filtros para extraer solo los genes expresados con significancia estadística
     ~~~
-    res = stattest(bgf, feature = "gene", covariate = "experiment", getFC = T, meas = "FPKM")
+    stat_res = (res$pvalue<=0.01 & abs(res$log2FoldChange) >=2)
     ~~~
 9. Resultados de la expresión diferencial.
     ~~~
@@ -153,11 +172,20 @@ Una vez que se han generado los perfiles de expresión, utilizaremos el lenguaje
 10. Agregamos las siguientes columnas.
     ~~~
     res$stat = ifelse(res$qval<alpha,yes=TRUE,no=FALSE) # Definimos alpha como valor de corte para asumir diferencia significativa
-    res$log2fc = log(res$fc,base=2)                     # Agregamos la razón de cambio en log2
+    res$fc = 2^res$log2FoldChange                       # Agregamos la razón de cambio 
+    res$log10fc = log(res$fc,base=10)                   # Agregamos la razón de cambio en log10
     res$log10qvalue = -log(res$qval,base=10)            # Agregamos el valor estadístico en -log10
     ~~~
 11. Por último, filtraremos los datos con expresión significativa
     ~~~
     diff_genes = res %>% filter(stat == TRUE)
     diff_ids = diff_genes$id
+    ~~~
+12. Algunos gráficos útiles, pueden generarse como el Volcano Plot
+    ~~~
+    with(res, plot(log2FoldChange, -log10(pvalue), col="blue", pch=20, main="Volcano plot DESeq2"))
+    ~~~
+13. Y Otro gráfico es el MA Plot
+    ~~~
+    plotMA(res, main="MA-plot DESeq2")
     ~~~
